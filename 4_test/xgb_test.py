@@ -11,8 +11,20 @@ def load_model(file):
 
 def test(xtest, ytest, xgb_load):
     ypred = xgb_load.predict(xtest)
+    return ypred
+
+def evaluation(ytest, ypred):
+    import json
     mae = mean_absolute_error(ytest, ypred)
-    print(f'Mean Absolute Error (MAE): {mae}')
+    metrics = {
+        'metrics': [{
+            'name': 'Mean Absolute Error (MAE)',
+            'numberValue': mae,
+            'format': 'RAW'
+        }]
+    }
+    with open('/mlpipeline-metrics.json','w') as f:
+        json.dump(metrics, f)
     
 if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser()
@@ -35,4 +47,5 @@ if __name__ == "__main__":
     xtest = pd.read_csv(args.xtest)
     ytest = pd.read_csv(args.ytest)
     model = load_model(args.model)      
-    test(xtest, ytest, model)
+    ypred = test(xtest, ytest, model)
+    evaluation(ytest, ypred)

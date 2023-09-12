@@ -8,6 +8,9 @@ from kfp import dsl
 )
 
 def jklim_xgb_pipeline():
+    
+    pvc = dsl.PipelineVolume('xgb-pvc')
+    
     data_load = dsl.ContainerOp(
         name='data load',
         image='kubeflow-registry.default.svc.cluster.local:30000/xgb_data_load:3.0',
@@ -41,13 +44,15 @@ def jklim_xgb_pipeline():
     
     test = dsl.ContainerOp(
         name='xgb test',
-        image='kubeflow-registry.default.svc.cluster.local:30000/xgb_test:3.0',
+        image='kubeflow-registry.default.svc.cluster.local:30000/xgb_test:3.5',
         arguments=[
             '--xtest',  dsl.InputArgumentPath(data_split.outputs['xtest']),
             '--ytest',  dsl.InputArgumentPath(data_split.outputs['ytest']),
             '--model',  dsl.InputArgumentPath(train.outputs['model'])
         ],
-        command=['python', 'xgb_test.py']
+        command=['python', 'xgb_test.py'],
+        pvolumes={'/app/model': pvc},
+        file_outputs={'mlpipeline-metrics' : '/mlpipeline-metrics.json'}
     )
     
     data_split.after(data_load)
