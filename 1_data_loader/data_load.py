@@ -16,5 +16,15 @@ if __name__ == "__main__":
         print('Data Load Complete.')
     except:
         print('DB connect Fail.')
-    dataset = dataset[dataset['number']==1]
-    dataset.to_csv('/dataset.csv', index=False)
+        
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument(
+        '--num',
+        type=int,
+        help="Building Number"
+    )
+    args = argument_parser.parse_args()
+    building_num = args.num
+    
+    dataset = dataset[dataset['number']==building_num]
+    dataset.to_csv('/dataset.csv', index=False) 

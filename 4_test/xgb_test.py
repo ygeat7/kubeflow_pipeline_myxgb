@@ -43,9 +43,11 @@ if __name__ == "__main__":
         type=str,
         help="xgb model"
     )
+    
     args = argument_parser.parse_args()
     xtest = pd.read_csv(args.xtest)
     ytest = pd.read_csv(args.ytest)
+    
     model = load_model(args.model)      
     ypred = test(xtest, ytest, model)
     evaluation(ytest, ypred)
