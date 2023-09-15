@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mydb
+  labels:
+    app: mydb
+spec:
+  containers:
+  - name: mydb
+    image: mysql:latest
+    env:
+    - name: MYSQL_ROOT_PASSWORD
+      value: qwer1234
+    ports:
+    - containerPort: 3306
+    volumeMounts:
+    - name: db
+      mountPath: /var/lib/mysql
+  volumes:
+  - name: db
+    persistentVolumeClaim:
+      claimName: mydb-pvc

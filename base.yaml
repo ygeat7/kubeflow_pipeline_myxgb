@@ -1,0 +1,83 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  name: random-experiment3
+  namespace: 'jklim'
+spec:
+  maxTrialCount: 15
+  parallelTrialCount: 3
+  maxFailedTrialCount: 3
+  resumePolicy: Never
+  objective:
+    type: minimize
+    goal: 100
+    objectiveMetricName: mae
+    additionalMetricNames: []
+  algorithm:
+    algorithmName: random
+    algorithmSettings: []
+  parameters:
+    - name: lr
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - '0.1'
+          - '0.01'
+          - '0.001'
+    - name: 'n'
+      parameterType: int
+      feasibleSpace:
+        min: '50'
+        max: '300'
+        step: '50'
+    - name: d
+      parameterType: int
+      feasibleSpace:
+        min: '5'
+        max: '15'
+        step: '1'
+  metricsCollectorSpec:
+    collector:
+      kind: StdOut
+  trialTemplate:
+    primaryContainerName: training-container
+    successCondition: status.conditions.#(type=="Complete")#|#(status=="True")#
+    failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
+    retain: false
+    trialParameters:
+      - name: learning_rate
+        reference: lr
+        description: ''
+      - name: n_estimators
+        reference: 'n'
+        description: ''
+      - name: max_depth
+        reference: d
+        description: ''
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          metadata:
+            annotations:
+              sidecar.istio.io/inject: 'false'
+          spec:
+            containers:
+              - name: training-container
+                image: kubeflow-registry.default.svc.cluster.local:30000/katib:v1.2
+                command:
+                  - python3
+                  - /app/main.py
+                  - '--learning_rate=${trialParameters.learning_rate}'
+                  - '--n_estimators=${trialParameters.n_estimators}'
+                  - '--max_depth=${trialParameters.max_depth}'
+                volumeMounts:
+                    - name: data-pvc
+                      mountPath: /app/data
+                      subPath: building1
+            restartPolicy: Never
+            volumes:
+                - name: data-pvc
+                  persistentVolumeClaim:
+                    claimName: data-pvc
