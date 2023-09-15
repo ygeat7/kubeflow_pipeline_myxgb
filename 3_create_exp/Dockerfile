@@ -2,7 +2,7 @@ FROM python:3.8
 ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 COPY . /app/
+RUN mkdir exp
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN mkdir model
-ENTRYPOINT ["python", "xgb_test.py"]
+ENTRYPOINT ["python", "create_exp.py"]
