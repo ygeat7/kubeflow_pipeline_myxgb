@@ -14,7 +14,7 @@ def get_experiemt_xgb(yaml_path):
 
     katib_client = KatibClient()
     
-    time.sleep(60)
+    time.sleep(10)
     while True:
         time.sleep(10)
         if katib_client.get_experiment_status(name,namespace) == 'Succeeded':

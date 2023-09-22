@@ -3,11 +3,11 @@ import kfp.components as comp
 from kfp import dsl
 
 @dsl.pipeline(
-    name='jklim-xgb',
-    description='jklim xgb test'
+    name='xgb-pipeline-katib',
+    description='xgb pipeline with katib'
 )
 
-def jklim_xgb_pipeline(building_num: int=1):
+def xgb_pipeline_katib(building_num: int=1):
     
     xgb_pvc = dsl.PipelineVolume('xgb-pvc')
     exp_pvc = dsl.PipelineVolume('exp-pvc')
@@ -41,7 +41,7 @@ def jklim_xgb_pipeline(building_num: int=1):
     )
 
     katib_create_exp = dsl.ContainerOp(
-        name='create experiment',
+        name='create katib experiment',
         image='kubeflow-registry.default.svc.cluster.local:30000/create_exp:5.1',
         arguments=[
             '--expyaml', dsl.InputArgumentPath(data_split.outputs['expyaml'])
@@ -51,7 +51,7 @@ def jklim_xgb_pipeline(building_num: int=1):
 
     get_best_params = dsl.ContainerOp(
         name='get best params',
-        image='kubeflow-registry.default.svc.cluster.local:30000/get_bp:5.2',
+        image='kubeflow-registry.default.svc.cluster.local:30000/get_bp:5.3',
         arguments=[
             '--expyaml', dsl.InputArgumentPath(data_split.outputs['expyaml'])
         ],
@@ -93,4 +93,4 @@ def jklim_xgb_pipeline(building_num: int=1):
 
 if __name__ == "__main__":
     import kfp.compiler as compiler
-    compiler.Compiler().compile(jklim_xgb_pipeline, __file__ + ".tar.gz")
+    compiler.Compiler().compile(xgb_pipeline_katib, __file__ + ".tar.gz")
